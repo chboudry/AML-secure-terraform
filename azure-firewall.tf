@@ -144,6 +144,16 @@ resource "azurerm_firewall_policy_rule_collection_group" "azure_firewall_rules_c
     }
 
     rule {
+      name = "files.pythonhosted.org"
+      protocols {
+        type = "Https"
+        port = 443
+      }
+      source_ip_groups  = [azurerm_ip_group.ip_group_spoke.id]
+      destination_fqdns = ["files.pythonhosted.org", ]
+    }
+
+    rule {
       name = "ubuntu-libraries"
       protocols {
         type = "Https"

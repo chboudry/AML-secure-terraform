@@ -23,8 +23,12 @@
 - Make sure your image builder cluster was created with a no public IP only otherwise it will fail/timeout when it will resize for the first time
 - Destination VNET has a route more specific than 0.0.0.0/0 thus per routes priority redirection to the Firewall of routes with destination VNET won't apply. In the current example, I do not have NSG on the training subnet, if you add one you will need to add in your NSG any port source to destination VNET port 29876, 29877, 44224. 
 
-### AKS with CNI
+### Inferencing Environment
 
+#### Managed Endpoint
+Managed Endpoint are not supported with ML workspaces that have private endpoints.
+
+#### AKS with CNI
 Work in progress
 
 ## Usage
