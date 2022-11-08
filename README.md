@@ -26,7 +26,11 @@
 ### Inferencing Environment
 
 #### Managed Endpoint
-Managed Endpoint are not supported with ML workspaces that have private endpoints.
+
+Requirements:
+- Workspace v1_legacy_mode_enabled to false (this is by default in terraform)
+- egress_public_network_access="disabled" when you add the deployment to the managed online endpoint
+
 
 #### AKS with CNI
 Work in progress
