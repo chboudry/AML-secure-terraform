@@ -12,8 +12,8 @@ resource "azurerm_network_interface" "dsvm" {
 
 resource "azurerm_windows_virtual_machine" "dsvm" {
   name                = var.dsvm_name
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
+  location            = azurerm_resource_group.hub_rg.location
+  resource_group_name = azurerm_resource_group.hub_rg.name
   network_interface_ids = [
     azurerm_network_interface.dsvm.id
   ]

@@ -7,7 +7,7 @@ variable "name" {
 variable "environment" {
   type        = string
   description = "Name of the environment"
-  default     = "test1"
+  default     = "test2"
 }
 
 variable "location" {
@@ -31,10 +31,10 @@ variable "training_subnet_address_space" {
   default     = ["10.30.1.0/24"]
 }
 
-variable "aks_subnet_address_space" {
+variable "inference_subnet_address_space" {
   type        = list(string)
-  description = "Address space of the aks subnet"
-  default     = ["10.30.2.0/23"]
+  description = "Address space of the inference subnet"
+  default     = ["10.30.2.0/24"]
 }
 
 variable "ml_subnet_address_space" {

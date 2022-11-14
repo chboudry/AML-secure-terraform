@@ -16,7 +16,7 @@
 #     name           = "system"
 #     node_count     = 1
 #     vm_size        = "Standard_DS2_v2"
-#     vnet_subnet_id = azurerm_subnet.snet-aks.id
+#     vnet_subnet_id = azurerm_subnet.snet-inference.id
 #   }
 
 #   network_profile {
