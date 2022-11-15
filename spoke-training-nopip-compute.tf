@@ -36,6 +36,7 @@ resource "azapi_resource" "nopip_compute_cluster" {
     }
   })
   depends_on = [
+    azurerm_subnet.snet-training,
     azurerm_private_endpoint.mlw_ple,
     azurerm_subnet_network_security_group_association.nsg-training-link
   ]
@@ -64,6 +65,7 @@ resource "azapi_resource" "nopip_compute_instance" {
     }
   })
   depends_on = [
+    azurerm_subnet.snet-training,
     azurerm_private_endpoint.mlw_ple,
     azurerm_subnet_network_security_group_association.nsg-training-link
   ]

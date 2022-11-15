@@ -15,7 +15,6 @@ resource "azurerm_subnet" "snet-jumphost" {
 
 }
 
-
 resource "azurerm_subnet" "azure_bastion" {
   name                 = "AzureBastionSubnet"
   resource_group_name  = azurerm_resource_group.hub_rg.name
@@ -32,7 +31,6 @@ resource "azurerm_subnet" "azure_firewall" {
 }
 
 #Vnet Peering
-
 resource "azurerm_virtual_network_peering" "direction1" {
   name                         = "${azurerm_resource_group.hub_rg.name}-to-${azurerm_resource_group.default.name}"
   resource_group_name          = azurerm_resource_group.hub_rg.name
