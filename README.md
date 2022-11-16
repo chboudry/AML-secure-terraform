@@ -19,9 +19,8 @@
 
 #### Observations
 - No inbound rules makes this environment support No public IP __only__ (= a public IP compute won't work.)
-- Make sure you are using an image builder cluster as ACR can't build image when it is using a private endpoint.
-- Make sure your image builder cluster was created with a no public IP only otherwise it will fail/timeout when it will resize for the first time
-- Destination VNET has a route more specific than 0.0.0.0/0 thus per routes priority redirection to the Firewall of routes with destination VNET won't apply. In the current example, I do not have NSG on the training subnet, if you add one you will need to add in your NSG any port source to destination VNET port 29876, 29877, 44224. 
+- Make sure you are using an image builder cluster as ACR can't build image when it is using a private endpoint. I've put one for you in this template.
+- Destination VNET has a route more specific than 0.0.0.0/0 thus per routes priority redirection to the Firewall of routes with destination VNET won't apply. 
 
 ### Inferencing Environment
 
