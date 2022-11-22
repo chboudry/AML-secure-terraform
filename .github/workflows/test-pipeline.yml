@@ -1,0 +1,27 @@
+name: test-pipeline
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - dev
+    paths:
+      - cli/jobs/pipelines/nyc-taxi/**
+      - .github/workflows/test-pipeline.yml
+      - cli/setup.sh
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: check out repo
+      uses: actions/checkout@v2
+    - name: azure login
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+    - name: setup
+      run: bash setup.sh
+      working-directory: cli
+      continue-on-error: true
+    - name: run job
+      run: bash -x ../../../run-job.sh pipeline.yml
+      working-directory: cli/jobs/pipelines/nyc-taxi
