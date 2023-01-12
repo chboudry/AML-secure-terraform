@@ -113,7 +113,7 @@ resource "azurerm_network_security_group" "bastion_nsg" {
 
 
 resource "azurerm_bastion_host" "azure_bastion_instance" {
-  name                = "bas-${var.name}-${var.environment}"
+  name                = "bas-${var.name}"
   location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.hub_rg.name
 

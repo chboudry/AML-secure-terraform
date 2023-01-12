@@ -21,13 +21,21 @@ provider "azapi" {
 
 data "azurerm_client_config" "current" {}
 
-resource "azurerm_resource_group" "default" {
-  name     = "rg-${var.name}-${var.environment}"
+#Hub Resource Group
+resource "azurerm_resource_group" "hub_rg" {
+  name     = "rg-${var.name}-hub"
   location = var.location
 }
 
-#Hub Resource Group
-resource "azurerm_resource_group" "hub_rg" {
-  name     = "rg-hub-${var.name}-${var.environment}"
+#Spoke ML
+resource "azurerm_resource_group" "default" {
+  name     = "rg-${var.name}-ml"
   location = var.location
 }
+
+#Spoke AKS
+resource "azurerm_resource_group" "aks" {
+  name     = "rg-${var.name}-aks"
+  location = var.location
+}
+

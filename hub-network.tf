@@ -1,7 +1,7 @@
 #Hub Virtual Network
 
 resource "azurerm_virtual_network" "hub" {
-  name                = "vnet-hub-${var.name}-${var.environment}"
+  name                = "vnet-hub-${var.name}"
   address_space       = var.vnet_hub_address_space
   location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.hub_rg.name
