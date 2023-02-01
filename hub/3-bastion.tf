@@ -1,6 +1,6 @@
 resource "azurerm_public_ip" "azure_bastion" {
   name                = "pip-azure-bastion"
-  location            = azurerm_resource_group.default.location
+  location            = azurerm_resource_group.hub_rg.location
   resource_group_name = azurerm_resource_group.hub_rg.name
   allocation_method   = "Static"
   sku                 = "Standard"
@@ -8,7 +8,7 @@ resource "azurerm_public_ip" "azure_bastion" {
 
 resource "azurerm_network_security_group" "bastion_nsg" {
   name                = "nsg-bastion"
-  location            = azurerm_resource_group.default.location
+  location            = azurerm_resource_group.hub_rg.location
   resource_group_name = azurerm_resource_group.hub_rg.name
 
   security_rule {
@@ -114,7 +114,7 @@ resource "azurerm_network_security_group" "bastion_nsg" {
 
 resource "azurerm_bastion_host" "azure_bastion_instance" {
   name                = "bas-${var.name}"
-  location            = azurerm_resource_group.default.location
+  location            = azurerm_resource_group.hub_rg.location
   resource_group_name = azurerm_resource_group.hub_rg.name
 
   ip_configuration {

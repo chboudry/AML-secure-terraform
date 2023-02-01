@@ -43,7 +43,7 @@ variable "vnet_ml_address_space" {
   default     = ["10.41.0.0/16"]
 }
 
-variable "ml_subnet_address_space" {
+variable "workspace_subnet_address_space" {
   type        = list(string)
   description = "Address space of the ML workspace subnet"
   default     = ["10.41.0.0/24"]

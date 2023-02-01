@@ -1,7 +1,7 @@
 resource "azurerm_network_interface" "dsvm" {
   name                = "nic-${var.dsvm_name}"
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
+  location            = azurerm_resource_group.hub_rg.location
+  resource_group_name = azurerm_resource_group.hub_rg.name
 
   ip_configuration {
     name                          = "configuration"

@@ -1,9 +1,7 @@
-#Hub Virtual Network
-
 resource "azurerm_virtual_network" "hub" {
   name                = "vnet-hub-${var.name}"
   address_space       = var.vnet_hub_address_space
-  location            = azurerm_resource_group.default.location
+  location            = azurerm_resource_group.hub_rg.location
   resource_group_name = azurerm_resource_group.hub_rg.name
 }
 
@@ -30,38 +28,6 @@ resource "azurerm_subnet" "azure_firewall" {
 
 }
 
-#Vnet Peering
-resource "azurerm_virtual_network_peering" "direction1" {
-  name                         = "${azurerm_resource_group.hub_rg.name}-to-${azurerm_resource_group.default.name}"
-  resource_group_name          = azurerm_resource_group.hub_rg.name
-  virtual_network_name         = azurerm_virtual_network.hub.name
-  remote_virtual_network_id    = azurerm_virtual_network.default.id
-  allow_virtual_network_access = true
-  allow_forwarded_traffic      = false
-  allow_gateway_transit        = false
-  use_remote_gateways          = false
-  depends_on = [
-    azurerm_virtual_network.hub,
-    azurerm_virtual_network.default
-  ]
-
-}
-
-resource "azurerm_virtual_network_peering" "direction2" {
-  name                         = "${azurerm_resource_group.default.name}-to-${azurerm_resource_group.hub_rg.name}"
-  resource_group_name          = azurerm_resource_group.default.name
-  virtual_network_name         = azurerm_virtual_network.default.name
-  remote_virtual_network_id    = azurerm_virtual_network.hub.id
-  allow_virtual_network_access = true
-  allow_forwarded_traffic      = false
-  allow_gateway_transit        = false
-  use_remote_gateways          = false
-  depends_on = [
-    azurerm_virtual_network.hub,
-    azurerm_virtual_network.default
-  ]
-
-}
 
 # Private DNS Zones
 resource "azurerm_private_dns_zone" "dnsvault" {
@@ -137,7 +103,6 @@ resource "azurerm_private_dns_zone_virtual_network_link" "vnetlinknbs" {
 }
 
 # NSG for jump_host Subnet
-
 resource "azurerm_network_security_group" "jump_host" {
   name                = "nsg-jumphost-subnet"
   location            = azurerm_resource_group.hub_rg.location
@@ -155,13 +120,13 @@ resource "azurerm_subnet_network_security_group_association" "jumphost_nsg_assoc
 # Route Table for Jump host subnet
 resource "azurerm_route_table" "jumphost_rt" {
   name                = "rt-jumphost"
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
+  location            = azurerm_resource_group.hub_rg.location
+  resource_group_name = azurerm_resource_group.hub_rg.name
 }
 
 resource "azurerm_route" "jumphost-fw-route" {
   name                   = "udr-Default"
-  resource_group_name    = azurerm_resource_group.default.name
+  resource_group_name    = azurerm_resource_group.hub_rg.name
   route_table_name       = azurerm_route_table.jumphost_rt.name
   address_prefix         = "0.0.0.0/0"
   next_hop_type          = "VirtualAppliance"

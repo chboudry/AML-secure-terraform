@@ -35,7 +35,7 @@ resource "azurerm_ip_group" "ip_group_dsvm_subnet" {
 
 resource "azurerm_public_ip" "azure_firewall" {
   name                = "pip-azfw"
-  location            = azurerm_resource_group.default.location
+  location            = azurerm_resource_group.hub_rg.location
   resource_group_name = azurerm_resource_group.hub_rg.name
   allocation_method   = "Static"
   sku                 = "Standard"
@@ -44,7 +44,7 @@ resource "azurerm_public_ip" "azure_firewall" {
 resource "azurerm_firewall_policy" "base_policy" {
   name                = "afwp-base-01"
   resource_group_name = azurerm_resource_group.hub_rg.name
-  location            = azurerm_resource_group.default.location
+  location            = azurerm_resource_group.hub_rg.location
   dns {
     proxy_enabled = true
   }
@@ -52,7 +52,7 @@ resource "azurerm_firewall_policy" "base_policy" {
 }
 resource "azurerm_firewall" "azure_firewall_instance" {
   name                = "afw-${var.name}"
-  location            = azurerm_resource_group.default.location
+  location            = azurerm_resource_group.hub_rg.location
   resource_group_name = azurerm_resource_group.hub_rg.name
   firewall_policy_id  = azurerm_firewall_policy.base_policy.id
   sku_tier            = "Premium"

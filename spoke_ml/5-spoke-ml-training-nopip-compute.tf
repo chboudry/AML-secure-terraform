@@ -68,7 +68,6 @@ resource "azapi_resource" "nopip_compute_instance" {
     azurerm_subnet.snet-training,
     azurerm_private_endpoint.mlw_ple,
     azurerm_subnet_network_security_group_association.nsg-training-link,
-    azurerm_firewall_policy_rule_collection_group.azure_firewall_rules_collection
   ]
 }
 
