@@ -80,26 +80,20 @@ resource "azurerm_monitor_diagnostic_setting" "azure_firewall_instance" {
   target_resource_id         = azurerm_firewall.azure_firewall_instance.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.default.id
 
-  log {
+  enabled_log {
     category = "AzureFirewallApplicationRule"
-    enabled  = true
-
     retention_policy {
       enabled = false
     }
   }
-  log {
+  enabled_log {
     category = "AzureFirewallNetworkRule"
-    enabled  = true
-
     retention_policy {
       enabled = false
     }
   }
-  log {
+  enabled_log {
     category = "AzureFirewallDnsProxy"
-    enabled  = true
-
     retention_policy {
       enabled = false
     }

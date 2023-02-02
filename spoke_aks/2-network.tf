@@ -1,17 +1,11 @@
-# Virtual Network
 resource "azurerm_virtual_network" "aks" {
-  name                = "vnet-${var.name}-aks"
+  name                = local.vnet_name
   address_space       = var.vnet_aks_address_space
   location            = azurerm_resource_group.aks.location
   resource_group_name = azurerm_resource_group.aks.name
-  dns_servers         = [azurerm_firewall.azure_firewall_instance.ip_configuration[0].private_ip_address]
-  depends_on = [
-    azurerm_virtual_network.hub,
-    azurerm_firewall.azure_firewall_instance
-  ]
+  dns_servers         = [var.firewall_private_ip]
 }
 
-# Subnet 
 resource "azurerm_subnet" "snet-aks" {
   name                                           = "snet-aks"
   resource_group_name                            = azurerm_resource_group.aks.name
@@ -19,9 +13,8 @@ resource "azurerm_subnet" "snet-aks" {
   address_prefixes                               = var.aks_subnet_address_space
 }
 
-# Peering
 resource "azurerm_virtual_network_peering" "aksdirection1" {
-  name                         = "${azurerm_resource_group.aks.name}-to-${azurerm_resource_group.default.name}"
+  name                         = "hub-to-aks"
   resource_group_name          = var.rg_hub_name
   virtual_network_name         = var.vnet_hub_name
   remote_virtual_network_id    = azurerm_virtual_network.aks.id
@@ -29,14 +22,10 @@ resource "azurerm_virtual_network_peering" "aksdirection1" {
   allow_forwarded_traffic      = false
   allow_gateway_transit        = false
   use_remote_gateways          = false
-  depends_on = [
-    azurerm_virtual_network.hub,
-    azurerm_virtual_network.aks
-  ]
 }
 
 resource "azurerm_virtual_network_peering" "aksdirection2" {
-  name                         = "${azurerm_resource_group.aks.name}-to-${azurerm_resource_group.hub_rg.name}"
+  name                         = "aks-to-hub"
   resource_group_name          = azurerm_resource_group.aks.name
   virtual_network_name         = azurerm_virtual_network.aks.name
   remote_virtual_network_id    = var.vnet_hub_id
@@ -44,10 +33,6 @@ resource "azurerm_virtual_network_peering" "aksdirection2" {
   allow_forwarded_traffic      = false
   allow_gateway_transit        = false
   use_remote_gateways          = false
-  depends_on = [
-    azurerm_virtual_network.hub,
-    azurerm_virtual_network.aks
-  ]
 }
 
 resource "azurerm_route_table" "rt-aks" {
@@ -62,7 +47,7 @@ resource "azurerm_route" "aks-Internet-Route" {
   route_table_name       = azurerm_route_table.rt-aks.name
   address_prefix         = "0.0.0.0/0"
   next_hop_type          = "VirtualAppliance"
-  next_hop_in_ip_address = azurerm_firewall.azure_firewall_instance.ip_configuration[0].private_ip_address
+  next_hop_in_ip_address = var.firewall_private_ip
 }
 
 resource "azurerm_subnet_route_table_association" "rt-aks-link" {

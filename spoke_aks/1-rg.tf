@@ -1,6 +1,6 @@
 # Spoke AKS
 resource "azurerm_resource_group" "aks" {
-  name     = "rg-${var.name}-aks"
+  name     = local.rg_name
   location = var.location
 }
 
