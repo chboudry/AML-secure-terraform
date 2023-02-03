@@ -4,12 +4,6 @@ variable "name" {
   default     = "chbou"
 }
 
-variable "environment" {
-  type        = string
-  description = "Name of the environment"
-  default     = "test2"
-}
-
 variable "location" {
   type        = string
   description = "Location of the resources"
@@ -17,55 +11,67 @@ variable "location" {
 
 }
 
-#Spoke Virtual Network
-
-variable "vnet_address_space" {
-  type        = list(string)
-  description = "Address space of the spoke virtual network"
-  default     = ["10.30.0.0/16"]
-}
-
-variable "training_subnet_address_space" {
-  type        = list(string)
-  description = "Address space of the training subnet"
-  default     = ["10.30.1.0/24"]
-}
-
-variable "inference_subnet_address_space" {
-  type        = list(string)
-  description = "Address space of the inference subnet"
-  default     = ["10.30.2.0/24"]
-}
-
-variable "ml_subnet_address_space" {
-  type        = list(string)
-  description = "Address space of the ML workspace subnet"
-  default     = ["10.30.0.0/24"]
-}
-
 #Hub Virtual Network
 variable "vnet_hub_address_space" {
   type        = list(string)
   description = "Address space of the Hub virtual network"
-  default     = ["10.31.0.0/16"]
+  default     = ["10.40.0.0/16"]
 }
 
 variable "jumphost_subnet_address_space" {
   type        = list(string)
   description = "Address space of the Jumphost subnet"
-  default     = ["10.31.2.0/24"]
+  default     = ["10.40.2.0/24"]
 }
 
 variable "bastion_subnet_address_space" {
   type        = list(string)
   description = "Address space of the bastion subnet"
-  default     = ["10.31.3.0/24"]
+  default     = ["10.40.3.0/24"]
 }
 
 variable "firewall_subnet_address_space" {
   type        = list(string)
   description = "Address space of the Az Fiewall subnet"
-  default     = ["10.31.4.0/24"]
+  default     = ["10.40.4.0/24"]
+}
+
+#Spoke ML
+variable "vnet_ml_address_space" {
+  type        = list(string)
+  description = "Address space of the spoke virtual network"
+  default     = ["10.41.0.0/16"]
+}
+
+variable "workspace_subnet_address_space" {
+  type        = list(string)
+  description = "Address space of the ML workspace subnet"
+  default     = ["10.41.0.0/24"]
+}
+
+variable "training_subnet_address_space" {
+  type        = list(string)
+  description = "Address space of the training subnet"
+  default     = ["10.41.1.0/24"]
+}
+
+variable "inference_subnet_address_space" {
+  type        = list(string)
+  description = "Address space of the inference subnet"
+  default     = ["10.41.2.0/24"]
+}
+
+#Spoke AKS
+variable "vnet_aks_address_space" {
+  type        = list(string)
+  description = "Address space of the spoke virtual network"
+  default     = ["10.42.0.0/16"]
+}
+
+variable "aks_subnet_address_space" {
+  type        = list(string)
+  description = "Address space of the training subnet"
+  default     = ["10.42.0.0/16"]
 }
 
 #Image Build Compute

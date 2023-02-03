@@ -46,7 +46,7 @@ resource "azapi_resource" "nopip_compute_cluster" {
 # https://learn.microsoft.com/en-us/azure/templates/microsoft.machinelearningservices/workspaces/computes?pivots=deployment-language-terraform
 # 
 resource "azapi_resource" "nopip_compute_instance" {
-  name = "${random_string.ci_prefix.result}instance"
+  name = "${random_string.ci_prefix.result}-instance"
   parent_id = azurerm_machine_learning_workspace.default.id
   type = "Microsoft.MachineLearningServices/workspaces/computes@2022-06-01-preview"
 
@@ -67,7 +67,7 @@ resource "azapi_resource" "nopip_compute_instance" {
   depends_on = [
     azurerm_subnet.snet-training,
     azurerm_private_endpoint.mlw_ple,
-    azurerm_subnet_network_security_group_association.nsg-training-link
+    azurerm_subnet_network_security_group_association.nsg-training-link,
   ]
 }
 

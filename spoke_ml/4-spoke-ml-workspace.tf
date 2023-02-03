@@ -1,24 +1,24 @@
 resource "azurerm_subnet" "snet-workspace" {
   name                                           = "snet-workspace"
-  resource_group_name                            = azurerm_resource_group.default.name
-  virtual_network_name                           = azurerm_virtual_network.default.name
-  address_prefixes                               = var.ml_subnet_address_space
+  resource_group_name                            = azurerm_resource_group.rg_ml.name
+  virtual_network_name                           = azurerm_virtual_network.vnet_ml.name
+  address_prefixes                               = var.workspace_subnet_address_space
   private_link_service_network_policies_enabled = false
 }
 
 # Dependent resources for Azure Machine Learning
 resource "azurerm_application_insights" "default" {
-  name                = "appi-${var.name}-${var.environment}"
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
-  workspace_id        = azurerm_log_analytics_workspace.default.id
+  name                = "appi-${var.name}"
+  location            = azurerm_resource_group.rg_ml.location
+  resource_group_name = azurerm_resource_group.rg_ml.name
+  workspace_id        = var.law_id
   application_type    = "web"
 }
 
 resource "azurerm_key_vault" "default" {
-  name                     = "kv-${var.name}-${var.environment}"
-  location                 = azurerm_resource_group.default.location
-  resource_group_name      = azurerm_resource_group.default.name
+  name                     = "kv-${var.name}"
+  location                 = azurerm_resource_group.rg_ml.location
+  resource_group_name      = azurerm_resource_group.rg_ml.name
   tenant_id                = data.azurerm_client_config.current.tenant_id
   sku_name                 = "premium"
   purge_protection_enabled = true
@@ -30,9 +30,9 @@ resource "azurerm_key_vault" "default" {
 }
 
 resource "azurerm_storage_account" "default" {
-  name                     = "st${var.name}${var.environment}"
-  location                 = azurerm_resource_group.default.location
-  resource_group_name      = azurerm_resource_group.default.name
+  name                     = "st${var.name}"
+  location                 = azurerm_resource_group.rg_ml.location
+  resource_group_name      = azurerm_resource_group.rg_ml.name
   account_tier             = "Standard"
   account_replication_type = "GRS"
 
@@ -43,9 +43,9 @@ resource "azurerm_storage_account" "default" {
 }
 
 resource "azurerm_container_registry" "default" {
-  name                = "cr${var.name}${var.environment}"
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
+  name                = "cr${var.name}"
+  location            = azurerm_resource_group.rg_ml.location
+  resource_group_name = azurerm_resource_group.rg_ml.name
   sku                 = "Premium"
   admin_enabled       = true
 
@@ -57,9 +57,9 @@ resource "azurerm_container_registry" "default" {
 
 # Machine Learning workspace
 resource "azurerm_machine_learning_workspace" "default" {
-  name                    = "mlw-${var.name}-${var.environment}"
-  location                = azurerm_resource_group.default.location
-  resource_group_name     = azurerm_resource_group.default.name
+  name                    = "mlw-${var.name}"
+  location                = azurerm_resource_group.rg_ml.location
+  resource_group_name     = azurerm_resource_group.rg_ml.name
   application_insights_id = azurerm_application_insights.default.id
   key_vault_id            = azurerm_key_vault.default.id
   storage_account_id      = azurerm_storage_account.default.id
@@ -77,7 +77,6 @@ resource "azurerm_machine_learning_workspace" "default" {
   # We need an image builder as ACR can't do this in a VNET
   image_build_compute_name      = var.image_build_compute_name
   depends_on = [
-    azurerm_firewall.azure_firewall_instance,
     azurerm_private_endpoint.kv_ple,
     azurerm_private_endpoint.st_ple_blob,
     azurerm_private_endpoint.storage_ple_file,
@@ -89,14 +88,14 @@ resource "azurerm_machine_learning_workspace" "default" {
 
 # Private endpoints
 resource "azurerm_private_endpoint" "kv_ple" {
-  name                = "ple-${var.name}-${var.environment}-kv"
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
+  name                = "ple-${var.name}-kv"
+  location            = azurerm_resource_group.rg_ml.location
+  resource_group_name = azurerm_resource_group.rg_ml.name
   subnet_id           = azurerm_subnet.snet-workspace.id
 
   private_dns_zone_group {
     name                 = "private-dns-zone-group"
-    private_dns_zone_ids = [azurerm_private_dns_zone.dnsvault.id]
+    private_dns_zone_ids = [var.dns_zone_dnsvault_id]
   }
 
   private_service_connection {
@@ -108,14 +107,14 @@ resource "azurerm_private_endpoint" "kv_ple" {
 }
 
 resource "azurerm_private_endpoint" "st_ple_blob" {
-  name                = "ple-${var.name}-${var.environment}-st-blob"
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
+  name                = "ple-${var.name}-st-blob"
+  location            = azurerm_resource_group.rg_ml.location
+  resource_group_name = azurerm_resource_group.rg_ml.name
   subnet_id           = azurerm_subnet.snet-workspace.id
 
   private_dns_zone_group {
     name                 = "private-dns-zone-group"
-    private_dns_zone_ids = [azurerm_private_dns_zone.dnsstorageblob.id]
+    private_dns_zone_ids = [var.dns_zone_dnsstorageblob_id]
   }
 
   private_service_connection {
@@ -127,14 +126,14 @@ resource "azurerm_private_endpoint" "st_ple_blob" {
 }
 
 resource "azurerm_private_endpoint" "storage_ple_file" {
-  name                = "ple-${var.name}-${var.environment}-st-file"
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
+  name                = "ple-${var.name}-st-file"
+  location            = azurerm_resource_group.rg_ml.location
+  resource_group_name = azurerm_resource_group.rg_ml.name
   subnet_id           = azurerm_subnet.snet-workspace.id
 
   private_dns_zone_group {
     name                 = "private-dns-zone-group"
-    private_dns_zone_ids = [azurerm_private_dns_zone.dnsstoragefile.id]
+    private_dns_zone_ids = [var.dns_zone_dnsstoragefile_id]
   }
 
   private_service_connection {
@@ -146,14 +145,14 @@ resource "azurerm_private_endpoint" "storage_ple_file" {
 }
 
 resource "azurerm_private_endpoint" "cr_ple" {
-  name                = "ple-${var.name}-${var.environment}-cr"
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
+  name                = "ple-${var.name}-cr"
+  location            = azurerm_resource_group.rg_ml.location
+  resource_group_name = azurerm_resource_group.rg_ml.name
   subnet_id           = azurerm_subnet.snet-workspace.id
 
   private_dns_zone_group {
     name                 = "private-dns-zone-group"
-    private_dns_zone_ids = [azurerm_private_dns_zone.dnscontainerregistry.id]
+    private_dns_zone_ids = [var.dns_zone_dnscontainerregistry_id]
   }
 
   private_service_connection {
@@ -165,14 +164,14 @@ resource "azurerm_private_endpoint" "cr_ple" {
 }
 
 resource "azurerm_private_endpoint" "mlw_ple" {
-  name                = "ple-${var.name}-${var.environment}-mlw"
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
+  name                = "ple-${var.name}-mlw"
+  location            = azurerm_resource_group.rg_ml.location
+  resource_group_name = azurerm_resource_group.rg_ml.name
   subnet_id           = azurerm_subnet.snet-workspace.id
 
   private_dns_zone_group {
     name                 = "private-dns-zone-group"
-    private_dns_zone_ids = [azurerm_private_dns_zone.dnsazureml.id, azurerm_private_dns_zone.dnsnotebooks.id]
+    private_dns_zone_ids = [var.dns_zone_dnsazureml_id, var.dns_zone_dnsnotebooks]
   }
 
   private_service_connection {
@@ -186,8 +185,8 @@ resource "azurerm_private_endpoint" "mlw_ple" {
 #Network Security Groups
 resource "azurerm_network_security_group" "nsg-workspace" {
   name                = "nsg-workspace"
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
+  location            = azurerm_resource_group.rg_ml.location
+  resource_group_name = azurerm_resource_group.rg_ml.name
 
   security_rule {
     name                       = "InboundBatchNodeManagement"
@@ -341,17 +340,17 @@ resource "azurerm_subnet_network_security_group_association" "nsg-workspace-link
 
 resource "azurerm_route_table" "rt-workspace" {
   name                = "rt-workspace"
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
+  location            = azurerm_resource_group.rg_ml.location
+  resource_group_name = azurerm_resource_group.rg_ml.name
 }
 
 resource "azurerm_route" "workspace-Internet-Route" {
   name                   = "udr-Default"
-  resource_group_name    = azurerm_resource_group.default.name
+  resource_group_name    = azurerm_resource_group.rg_ml.name
   route_table_name       = azurerm_route_table.rt-workspace.name
   address_prefix         = "0.0.0.0/0"
   next_hop_type          = "VirtualAppliance"
-  next_hop_in_ip_address = azurerm_firewall.azure_firewall_instance.ip_configuration[0].private_ip_address
+  next_hop_in_ip_address = var.firewall_private_ip
 }
 
 resource "azurerm_subnet_route_table_association" "rt-workspace-link" {

@@ -1,7 +1,7 @@
 resource "azurerm_subnet" "snet-training" {
   name                                           = "snet-training"
-  resource_group_name                            = azurerm_resource_group.default.name
-  virtual_network_name                           = azurerm_virtual_network.default.name
+  resource_group_name                            = azurerm_resource_group.rg_ml.name
+  virtual_network_name                           = azurerm_virtual_network.vnet_ml.name
   address_prefixes                               = var.training_subnet_address_space
   private_link_service_network_policies_enabled = false
   private_endpoint_network_policies_enabled = false
@@ -10,8 +10,8 @@ resource "azurerm_subnet" "snet-training" {
 #Network Security Groups for NO public IP
 resource "azurerm_network_security_group" "nsg-training" {
   name                = "nsg-training"
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
+  location            = azurerm_resource_group.rg_ml.location
+  resource_group_name = azurerm_resource_group.rg_ml.name
 
   security_rule {
     name                       = "InboundBatchNodeManagement"
@@ -166,17 +166,17 @@ resource "azurerm_subnet_network_security_group_association" "nsg-training-link"
 # UDR for compute instance and compute clusters
 resource "azurerm_route_table" "rt-training" {
   name                = "rt-training"
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
+  location            = azurerm_resource_group.rg_ml.location
+  resource_group_name = azurerm_resource_group.rg_ml.name
 }
 
 resource "azurerm_route" "training-Internet-Route" {
   name                   = "udr-Default"
-  resource_group_name    = azurerm_resource_group.default.name
+  resource_group_name    = azurerm_resource_group.rg_ml.name
   route_table_name       = azurerm_route_table.rt-training.name
   address_prefix         = "0.0.0.0/0"
   next_hop_type          = "VirtualAppliance"
-  next_hop_in_ip_address = azurerm_firewall.azure_firewall_instance.ip_configuration[0].private_ip_address
+  next_hop_in_ip_address = var.firewall_private_ip
 }
 
 resource "azurerm_subnet_route_table_association" "rt-training-link" {

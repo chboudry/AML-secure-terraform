@@ -2,57 +2,40 @@
 
 ![architecture-schema](docs/architectureschema.png)
 
-## Notes
+## Motivation
 
-### No public IP Training Compute 
+Right now, terraform official documentation only covers an example of secured workspace, without training computes, and without inference. Examples on how to properly secure the ml extension on AKS are also non existent for now.
 
-#### Logic
+This repo was made to demonstrate :
+- A hub & spoke toplogy
+- secure workspace
+- secure training computes (no public IP compute)
+- secure inference : dedicated AKS spoke & no public IP to aml extension
 
-1. VNET default NAT features is only provided to VM
-2. Compute instances & compute clusters are not VM
-3. But they need access to public IP (AAD, etc)
-4. Thus, you need to provide them a public IP
-5. Solutions are Azure Firewall, VNET NAT, Gateway...
-6. In the example above, we choose Firewall
-7. We use UDR to route trafic to Firewall
-8. in Azure Firewall, all approved traffic is automatically (S)Nated
+## How to
 
-#### Observations
-- No inbound rules makes this environment support No public IP __only__ (= a public IP compute won't work.)
-- Make sure you are using an image builder cluster as ACR can't build image when it is using a private endpoint. I've put one for you in this template.
-- Destination VNET has a route more specific than 0.0.0.0/0 thus per routes priority redirection to the Firewall of routes with destination VNET won't apply. 
+This was made to be as easy as possible to deploy.
+1. Feel free to edit variable defaults in variables.tf or to create your own tfvars
+1. az login
+1. if required: az account set --subscription
+1. terraform init
+1. terraform apply
 
-### Inferencing Environment
+If you are not interested by the AKS part, you can just delete the reference to the module in the main.tf line 42 to 53.
 
-#### Managed Endpoint
+## How to improve
 
-Requirements:
-- Workspace v1_legacy_mode_enabled to false (this is by default in terraform)
-- egress_public_network_access="disabled" when you add the deployment to the managed online endpoint
-- Targetted env need to use private image only (=can't target mcr.microsoft.com)
+This example was made fully in terraform to limit the amount of tool required.
+For a production deployment, you might consider the following change :
+- Leverage CICD pipeline with a service principal to run terraform
+- Use Gitops methodology to manage AKS internals instead of doing it like I did through kubernetes provider
 
+## Additionnal documentation
 
-#### AKS with CNI
-Work in progress
-
-## Usage
-
-- az login
-- terraform init
-- terraform apply
-
-
-## Troubleshooting
-
-### Kusto query
-
-```
-AzureDiagnostics 
-| order by TimeGenerated desc
-| where msg_s contains "Deny"
-| where msg_s !contains "DNS"
-| where msg_s !contains "UDP"
-| where msg_s !contains "database.clamav.net" 
-| where msg_s !contains "snapcraftcontent.com"
-| project TimeGenerated, msg_s
-```
+Here is some additionnal content that might interest you :
+- [No public IP training compute - network explained](./docs/nopipcompute.md)
+- Inferencing Environment 
+    - [Secure Managed Endpoint explained](./docs/managedendpoint.md)
+    - [Secure mlextension on AKS explained](./docs/aks.md)
+- [How to use afterwards - step by step of a model deployment to aks](./docs/howtouse.md)
+- [Troubleshooting](./docs/troubleshooting.md)

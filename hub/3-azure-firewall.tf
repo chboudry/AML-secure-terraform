@@ -6,21 +6,28 @@ resource "random_string" "fw_diag_prefix" {
   numeric  = false
 }
 resource "azurerm_ip_group" "ip_group_hub" {
-  name                = "hub-ipgroup"
+  name                = "ipgroup-hub"
   location            = azurerm_resource_group.hub_rg.location
   resource_group_name = azurerm_resource_group.hub_rg.name
   cidrs               = var.vnet_hub_address_space
 }
 
 resource "azurerm_ip_group" "ip_group_spoke" {
-  name                = "mlw-spoke-ipgroup"
+  name                = "ipgroup-spokeml"
   location            = azurerm_resource_group.hub_rg.location
   resource_group_name = azurerm_resource_group.hub_rg.name
-  cidrs               = var.vnet_address_space
+  cidrs               = var.vnet_ml_address_space
+}
+
+resource "azurerm_ip_group" "ip_group_spokeaks" {
+  name                = "ipgroup-spokeaks"
+  location            = azurerm_resource_group.hub_rg.location
+  resource_group_name = azurerm_resource_group.hub_rg.name
+  cidrs               = var.vnet_aks_address_space
 }
 
 resource "azurerm_ip_group" "ip_group_dsvm_subnet" {
-  name                = "dsvm-subnet-ipgroup"
+  name                = "ipgroup-jumphost"
   location            = azurerm_resource_group.hub_rg.location
   resource_group_name = azurerm_resource_group.hub_rg.name
   cidrs               = var.jumphost_subnet_address_space
@@ -28,7 +35,7 @@ resource "azurerm_ip_group" "ip_group_dsvm_subnet" {
 
 resource "azurerm_public_ip" "azure_firewall" {
   name                = "pip-azfw"
-  location            = azurerm_resource_group.default.location
+  location            = azurerm_resource_group.hub_rg.location
   resource_group_name = azurerm_resource_group.hub_rg.name
   allocation_method   = "Static"
   sku                 = "Standard"
@@ -37,15 +44,15 @@ resource "azurerm_public_ip" "azure_firewall" {
 resource "azurerm_firewall_policy" "base_policy" {
   name                = "afwp-base-01"
   resource_group_name = azurerm_resource_group.hub_rg.name
-  location            = azurerm_resource_group.default.location
+  location            = azurerm_resource_group.hub_rg.location
   dns {
     proxy_enabled = true
   }
 
 }
 resource "azurerm_firewall" "azure_firewall_instance" {
-  name                = "afw-${var.name}-${var.environment}"
-  location            = azurerm_resource_group.default.location
+  name                = "afw-${var.name}"
+  location            = azurerm_resource_group.hub_rg.location
   resource_group_name = azurerm_resource_group.hub_rg.name
   firewall_policy_id  = azurerm_firewall_policy.base_policy.id
   sku_tier            = "Premium"
@@ -69,30 +76,24 @@ resource "azurerm_firewall" "azure_firewall_instance" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "azure_firewall_instance" {
-  name                       = "diagnostics-${var.name}-${var.environment}-${random_string.fw_diag_prefix.result}"
+  name                       = "diagnostics-${var.name}-${random_string.fw_diag_prefix.result}"
   target_resource_id         = azurerm_firewall.azure_firewall_instance.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.default.id
 
-  log {
+  enabled_log {
     category = "AzureFirewallApplicationRule"
-    enabled  = true
-
     retention_policy {
       enabled = false
     }
   }
-  log {
+  enabled_log {
     category = "AzureFirewallNetworkRule"
-    enabled  = true
-
     retention_policy {
       enabled = false
     }
   }
-  log {
+  enabled_log {
     category = "AzureFirewallDnsProxy"
-    enabled  = true
-
     retention_policy {
       enabled = false
     }
@@ -120,6 +121,35 @@ resource "azurerm_firewall_policy_rule_collection_group" "azure_firewall_rules_c
     action   = "Allow"
 
     rule {
+      name             = "allow aks outbound"
+      protocols {
+        port = "80"
+        type = "Http"
+      }
+
+      protocols {
+        port = "443"
+        type = "Https"
+      }
+
+      source_ip_groups  = [azurerm_ip_group.ip_group_spokeaks.id]
+      destination_fqdns = [
+        "*.cdn.mscr.io",
+        "mcr.microsoft.com",
+        "*.data.mcr.microsoft.com",
+        "management.azure.com",
+        "login.microsoftonline.com",
+        "acs-mirror.azureedge.net",
+        "dc.services.visualstudio.com",
+        "*.opinsights.azure.com",
+        "*.oms.opinsights.azure.com",
+        "*.microsoftonline.com",
+        "*.monitoring.azure.com",
+      ]
+
+    }
+
+    rule {
       name = "dsvm-to-internet"
       protocols {
         type = "Https"
@@ -139,7 +169,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "azure_firewall_rules_c
         type = "Https"
         port = 443
       }
-      source_ip_groups      = [azurerm_ip_group.ip_group_spoke.id]
+      source_ip_groups      = [azurerm_ip_group.ip_group_spokeaks.id]
       destination_fqdn_tags = ["AzureKubernetesService"]
     }
 
@@ -216,7 +246,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "azure_firewall_rules_c
         type = "Https"
         port = 443
       }
-      source_ip_groups = [azurerm_ip_group.ip_group_spoke.id]
+      source_ip_groups = [azurerm_ip_group.ip_group_spokeaks.id]
       destination_fqdns = ["acs-mirror.azureedge.net",
         "*.docker.io",
         "production.cloudflare.docker.com",
@@ -229,7 +259,10 @@ resource "azurerm_firewall_policy_rule_collection_group" "azure_firewall_rules_c
         type = "Https"
         port = 443
       }
-      source_ip_groups  = [azurerm_ip_group.ip_group_spoke.id]
+      source_ip_groups  = [
+        azurerm_ip_group.ip_group_spoke.id,
+        azurerm_ip_group.ip_group_spokeaks.id
+      ]
       destination_fqdns = ["login.microsoftonline.com"]
     }
 
@@ -416,19 +449,19 @@ resource "azurerm_firewall_policy_rule_collection_group" "azure_firewall_rules_c
     }
 
     rule {
-      name                  = "aks-global-network-rule"
+      name                  = "aks-tcp-network-rule"
       protocols             = ["TCP"]
-      source_ip_groups      = [azurerm_ip_group.ip_group_spoke.id]
-      destination_addresses = ["AzureCloud"]
-      destination_ports     = ["443", "9000"]
+      source_ip_groups      = [azurerm_ip_group.ip_group_spokeaks.id]
+      destination_addresses = ["*"]
+      destination_ports     = ["*"] #["53","123","443","9000"]
     }
 
     rule {
-      name                  = "aks-ntp-network-rule"
+      name                  = "aks-udp-network-rule"
       protocols             = ["UDP"]
-      source_ip_groups      = [azurerm_ip_group.ip_group_spoke.id]
+      source_ip_groups      = [azurerm_ip_group.ip_group_spokeaks.id]
       destination_addresses = ["*"]
-      destination_ports     = ["123"]
+      destination_ports     = ["*"]#["53","123","1194"]
     }
 
     rule {
@@ -497,6 +530,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "azure_firewall_rules_c
   }
   depends_on = [
     azurerm_ip_group.ip_group_hub,
-    azurerm_ip_group.ip_group_spoke
+    azurerm_ip_group.ip_group_spoke,
+    azurerm_ip_group.ip_group_spokeaks
   ]
 }
