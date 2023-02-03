@@ -39,22 +39,27 @@ resource "helm_release" "nginx_ingress" {
   }
 }
 
-resource "kubernetes_ingress" "ingress" {
+resource "kubernetes_ingress_v1" "ingress" {
   metadata {
     name = "azureml-fe"
     namespace= "azureml"
   }
 
   spec {
-    ingress_class_name = "ingress-nginx"
+    ingress_class_name = "nginx"
     rule {
       http {
         path {
-          backend {
-            service_name = "azureml-fe"
-            service_port = 80
-          }
           path = "/aml/"
+          path_type = "Prefix"
+          backend {
+            service {
+                name = "azureml-fe"
+                port {
+                    number = 80
+                }
+            }
+          }
         }
       }
     }
@@ -64,6 +69,9 @@ resource "kubernetes_ingress" "ingress" {
     helm_release.nginx_ingress
   ]
 }
+
+
+
 
 resource "local_file" "kubeconfig" {
   content  = var.kubeconfig
