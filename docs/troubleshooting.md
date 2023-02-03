@@ -1,6 +1,12 @@
-## Troubleshooting
+# Troubleshooting
 
-### Kusto query
+## Terraform
+
+If you messed up the internals aks installation, it might be convenient to delete it in Azure and in the terraform state to redeploy. You can remove part of the state using the following : 
+
+`terraform state rm module.aks.module.kubernetes-config`
+
+## Kusto query
 
 ```
 AzureDiagnostics 

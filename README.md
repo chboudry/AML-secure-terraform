@@ -4,7 +4,7 @@
 
 ## Motivation
 
-Right now, terraform official documentation only covers an example of secured workspace, without training computes, and without inference. Examples on how to properly secure the ml extension on AKS are also non existent for now.
+Right now, terraform official documentation only covers [an example of secured workspace](https://github.com/Azure/terraform/tree/master/quickstart/301-machine-learning-hub-spoke-secure), without secured training computes, and without secured inference. Examples on how to properly secure the ml extension on AKS are also non existent for now.
 
 This repo was made to demonstrate :
 - A hub & spoke toplogy
@@ -29,6 +29,7 @@ This example was made fully in terraform to limit the amount of tool required.
 For a production deployment, you might consider the following change :
 - Leverage CICD pipeline with a service principal to run terraform
 - Use Gitops methodology to manage AKS internals instead of doing it like I did through kubernetes provider
+- Improving AKS security even more (RBAC authentication, TLS, etc). I chose not to add those because I wanted for the code to remain as simple as possible while focusing on the AML side.
 
 ## Additionnal documentation
 

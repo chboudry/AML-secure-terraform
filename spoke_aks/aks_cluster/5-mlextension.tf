@@ -1,14 +1,3 @@
-# How to install the ml extension on aks cluster
-# Documentation :
-# https://learn.microsoft.com/en-us/azure/templates/microsoft.kubernetesconfiguration/2022-03-01/extensions?pivots=deployment-language-terraform
-
-# ARM example :
-# https://github.com/Azure/AML-Kubernetes/blob/master/files/deployextension.json
-
-# My trick, install the ml extension through az cli command, then :
-# az k8s-extension list --cluster-name CLUSTER_NAME --resource-group RG_NAME --cluster-type managedClusters
-# will give you a readable configurationSettings to copy from
-
 resource "azapi_resource" "mlextension" {
   type = "Microsoft.KubernetesConfiguration/extensions@2022-11-01"
   name = "aksextml"
