@@ -1,46 +1,68 @@
-resource "kubernetes_namespace" "test" {
+resource "kubernetes_namespace" "nginx_ingress" {
   metadata {
-    name = "test"
+    name = "ingress"
   }
 }
 
-resource "kubernetes_deployment_v1" "test" {
-  metadata {
-    name      = "test"
-    namespace = kubernetes_namespace.test.metadata.0.name
-  }
-  spec {
-    replicas = 2
-    selector {
-      match_labels = {
-        app = "test"
-      }
-    }
-    template {
-      metadata {
-        labels = {
-          app = "test"
-        }
-      }
-      spec {
-        container {
-          image = "nginx:1.19.4"
-          name  = "nginx"
+# https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx
+resource "helm_release" "nginx_ingress" {
+  name       = "ingress-nginx"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  version    = "4.4.2"
+  namespace  = kubernetes_namespace.nginx_ingress.metadata.0.name
 
-          resources {
-            limits = {
-              memory = "512M"
-              cpu    = "1"
-            }
-            requests = {
-              memory = "256M"
-              cpu    = "50m"
-            }
+  set {
+    name  = "controller.service.type"
+    value = "ClusterIP"
+  }
+  set {
+    name  = "controller.service.internal.enabled"
+    value = "true"
+  }
+  set {
+    name  = "controller.service.internal.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-internal"
+    value = "true"
+    type  = "string"
+  }
+  set {
+    name  = "controller.autoscaling.enabled"
+    value = "true"
+  }
+  set {
+    name  = "controller.autoscaling.minReplicas"
+    value = "2"
+  }
+  set {
+    name  = "controller.autoscaling.maxReplicas"
+    value = "10"
+  }
+}
+
+resource "kubernetes_ingress" "ingress" {
+  metadata {
+    name = "azureml-fe"
+    namespace= "azureml"
+  }
+
+  spec {
+    ingress_class_name = "ingress-nginx"
+    rule {
+      http {
+        path {
+          backend {
+            service_name = "azureml-fe"
+            service_port = 80
           }
+          path = "/aml/"
         }
       }
     }
   }
+
+  depends_on = [
+    helm_release.nginx_ingress
+  ]
 }
 
 resource "local_file" "kubeconfig" {
