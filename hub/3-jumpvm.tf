@@ -1,3 +1,11 @@
+resource "azurerm_public_ip" "public_ip" {
+  name                = "dsvmpublicip"
+  resource_group_name = azurerm_resource_group.hub_rg.name
+  location            = azurerm_resource_group.hub_rg.location
+  allocation_method   = "Dynamic"
+}
+
+
 resource "azurerm_network_interface" "dsvm" {
   name                = "nic-${var.dsvm_name}"
   location            = azurerm_resource_group.hub_rg.location
@@ -7,6 +15,7 @@ resource "azurerm_network_interface" "dsvm" {
     name                          = "configuration"
     subnet_id                     = azurerm_subnet.snet-jumphost.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id = azurerm_public_ip.public_ip.id
   }
 }
 

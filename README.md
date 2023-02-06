@@ -10,7 +10,7 @@ This repo was made to demonstrate :
 - A hub & spoke toplogy
 - secure workspace
 - secure training computes (no public IP compute)
-- secure inference : dedicated AKS spoke & no public IP to aml extension
+- secure inference : dedicated AKS spoke & no public IP to AzureML extension
 
 ## How to
 
@@ -38,5 +38,6 @@ Here is some additionnal content that might interest you :
 - Inferencing Environment 
     - [Secure Managed Endpoint explained](./docs/managedendpoint.md)
     - [Secure mlextension on AKS explained](./docs/aks.md)
-- [How to use afterwards - step by step of a model deployment to aks](./docs/howtouse.md)
+- How to use afterwards
+    - [step by step of a model deployment to aks](./docs/howtouseaks.md)
 - [Troubleshooting](./docs/troubleshooting.md)
