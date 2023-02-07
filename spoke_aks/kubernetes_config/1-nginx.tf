@@ -14,12 +14,12 @@ resource "helm_release" "nginx_ingress" {
 
   set {
     name  = "controller.service.type"
-    value = "ClusterIP"
+    value = "LoadBalancer"
   }
-  set {
+ /* set {
     name  = "controller.service.internal.enabled"
     value = "true"
-  }
+  }*/
   set {
     name  = "controller.service.internal.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-internal"
     value = "true"
@@ -31,11 +31,11 @@ resource "helm_release" "nginx_ingress" {
   }
   set {
     name  = "controller.autoscaling.minReplicas"
-    value = "2"
+    value = "1"
   }
   set {
     name  = "controller.autoscaling.maxReplicas"
-    value = "10"
+    value = "5"
   }
 }
 

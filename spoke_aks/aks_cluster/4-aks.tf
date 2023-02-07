@@ -28,6 +28,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 }
 
+resource "azurerm_role_assignment" "akstomanagevnet" {
+ scope = variable.vnet_id
+ role_definition_id = "/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7" #Network Contributor
+ principal_id = azurerm_kubernetes_cluster.aks.identity
+}
+
 data "azurerm_monitor_diagnostic_categories" "aksdiag" {
   resource_id = azurerm_kubernetes_cluster.aks.id
 }

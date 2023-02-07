@@ -4,6 +4,7 @@ module "aks-cluster" {
   aks_name = local.aks_name 
   rg_name = azurerm_resource_group.aks.name
   location     = azurerm_resource_group.aks.location
+  vnet_id = azurerm_virtual_network.aks.id
   subnet_id = azurerm_subnet.snet-aks.id
   law_id = var.law_id
 }
