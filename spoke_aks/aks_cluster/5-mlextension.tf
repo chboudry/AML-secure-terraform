@@ -19,11 +19,12 @@ resource "azapi_resource" "mlextension" {
             enableInference= "true"
             inferenceRouterHA= "true"
             inferenceRouterServiceType= "ClusterIP"
+            internalLoadBalancerProvider="azure"
             jobSchedulerLocation= azurerm_kubernetes_cluster.aks.location
             location=azurerm_kubernetes_cluster.aks.location
             domain= azurerm_kubernetes_cluster.aks.location
             "prometheus.prometheusSpec.externalLabels.cluster.name"= azurerm_kubernetes_cluster.aks.id
-            "nginxIngress.enabled"= "true"
+            "nginxIngress.enabled"= "false"
             "relayserver.enabled"= "false"
             "servicebus.enabled"= "false"
             installNvidiaDevicePlugin= "false"

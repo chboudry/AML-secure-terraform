@@ -13,29 +13,20 @@ resource "helm_release" "nginx_ingress" {
   namespace  = kubernetes_namespace.nginx_ingress.metadata.0.name
 
   set {
-    name  = "controller.service.type"
-    value = "LoadBalancer"
+    name  = "controller.service.externalTrafficPolicy"
+    value = "Local"
+    type  = "string"
   }
- /* set {
-    name  = "controller.service.internal.enabled"
-    value = "true"
-  }*/
+
   set {
-    name  = "controller.service.internal.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-internal"
+    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-internal"
     value = "true"
     type  = "string"
   }
-  set {
-    name  = "controller.autoscaling.enabled"
-    value = "true"
-  }
-  set {
-    name  = "controller.autoscaling.minReplicas"
-    value = "1"
-  }
-  set {
-    name  = "controller.autoscaling.maxReplicas"
-    value = "5"
+    set {
+    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-internal-subnet"
+    value = "snet-aks"
+    type  = "string"
   }
 }
 
