@@ -32,8 +32,10 @@ provider "helm" {
 }
 
 module "kubernetes-config" {
-  depends_on   = [module.aks-cluster]
+  //depends_on   = [module.aks-cluster]
   source       = "./kubernetes_config"
+  aks_id = module.aks-cluster.aks_id
   aks_name = local.aks_name 
+  aks_location = var.location
   kubeconfig   = data.azurerm_kubernetes_cluster.default.kube_config_raw
 }

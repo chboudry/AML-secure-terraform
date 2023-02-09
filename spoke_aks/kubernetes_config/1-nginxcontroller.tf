@@ -13,7 +13,7 @@ resource "helm_release" "nginx_ingress" {
   namespace  = kubernetes_namespace.nginx_ingress.metadata.0.name
 
   set {
-    name  = "controller.service.externalTrafficPolicy"
+    name  = "controller.service.externalTrafficPolicy" #https://github.com/Azure/AKS/issues/2903
     value = "Local"
     type  = "string"
   }
@@ -29,40 +29,6 @@ resource "helm_release" "nginx_ingress" {
     type  = "string"
   }
 }
-
-resource "kubernetes_ingress_v1" "ingress" {
-  metadata {
-    name = "azureml-fe"
-    namespace= "azureml"
-  }
-
-  spec {
-    ingress_class_name = "nginx"
-    rule {
-      http {
-        path {
-          path = "/aml/"
-          path_type = "Prefix"
-          backend {
-            service {
-                name = "azureml-fe"
-                port {
-                    number = 80
-                }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  depends_on = [
-    helm_release.nginx_ingress
-  ]
-}
-
-
-
 
 resource "local_file" "kubeconfig" {
   content  = var.kubeconfig

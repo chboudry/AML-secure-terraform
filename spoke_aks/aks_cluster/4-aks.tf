@@ -34,7 +34,7 @@ resource "azurerm_role_assignment" "akstomanagevnet" {
  principal_id = azurerm_kubernetes_cluster.aks.identity[0].principal_id
 }
 
-data "azurerm_monitor_diagnostic_categories" "aksdiag" {
+/*data "azurerm_monitor_diagnostic_categories" "aksdiag" {
   resource_id = azurerm_kubernetes_cluster.aks.id
 }
 
@@ -60,4 +60,4 @@ resource "azurerm_monitor_diagnostic_setting" "aks_diag" {
       enabled = false
     }
   }
-}
+}*/

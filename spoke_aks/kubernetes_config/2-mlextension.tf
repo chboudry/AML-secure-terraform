@@ -1,7 +1,7 @@
 resource "azapi_resource" "mlextension" {
   type = "Microsoft.KubernetesConfiguration/extensions@2022-11-01"
   name = "aksextml"
-  parent_id = azurerm_kubernetes_cluster.aks.id
+  parent_id = var.aks_id
   identity {
     type = "SystemAssigned"
   }
@@ -11,20 +11,20 @@ resource "azapi_resource" "mlextension" {
       configurationProtectedSettings = {}
       configurationSettings = {
             allowInsecureConnections="true"
-            clusterId= azurerm_kubernetes_cluster.aks.id
+            clusterId= var.aks_id
             clusterPurpose= "DevTest"
-            cluster_name= azurerm_kubernetes_cluster.aks.name
-            cluster_name_friendly= azurerm_kubernetes_cluster.aks.name
+            cluster_name= var.aks_name
+            cluster_name_friendly= var.aks_name
             enableTraining="true"
             enableInference= "true"
             inferenceRouterHA= "true"
             inferenceRouterServiceType= "ClusterIP"
-            internalLoadBalancerProvider="azure"
-            jobSchedulerLocation= azurerm_kubernetes_cluster.aks.location
-            location=azurerm_kubernetes_cluster.aks.location
-            domain= azurerm_kubernetes_cluster.aks.location
-            "prometheus.prometheusSpec.externalLabels.cluster.name"= azurerm_kubernetes_cluster.aks.id
-            "nginxIngress.enabled"= "false"
+            //internalLoadBalancerProvider="azure"
+            jobSchedulerLocation= var.aks_location
+            location=var.aks_location
+            domain= var.aks_location
+            "prometheus.prometheusSpec.externalLabels.cluster.name"= var.aks_id
+            //"nginxIngress.enabled"= "false"
             "relayserver.enabled"= "false"
             "servicebus.enabled"= "false"
             installNvidiaDevicePlugin= "false"
@@ -42,6 +42,6 @@ resource "azapi_resource" "mlextension" {
     }
   })
   depends_on = [
-    azurerm_kubernetes_cluster.aks
+    helm_release.nginx_ingress
   ]
 }
