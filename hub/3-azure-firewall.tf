@@ -444,7 +444,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "azure_firewall_rules_c
       name                  = "hub-to-spoke-rule"
       protocols             = ["Any"]
       source_ip_groups      = [azurerm_ip_group.ip_group_spoke.id, azurerm_ip_group.ip_group_hub.id]
-      destination_ip_groups = [azurerm_ip_group.ip_group_hub.id, azurerm_ip_group.ip_group_spoke.id]
+      destination_ip_groups = [azurerm_ip_group.ip_group_hub.id, azurerm_ip_group.ip_group_spoke.id, azurerm_ip_group.ip_group_spokeaks.id]
       destination_ports     = ["*"]
     }
 
