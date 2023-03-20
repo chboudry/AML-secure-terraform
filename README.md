@@ -39,5 +39,5 @@ Here is some additionnal content that might interest you :
     - [Secure Managed Endpoint explained](./docs/managedendpoint.md)
     - [Secure mlextension on AKS explained](./docs/aks.md)
 - How to use afterwards
-    - [step by step of a model deployment to aks](./docs/howtouseaks.md)
+    - [step by step of a model deployment to aks](./docs/howtouse_aks.md)
 - [Troubleshooting](./docs/troubleshooting.md)
