@@ -30,6 +30,8 @@ For a production deployment, you might consider the following change :
 - Leverage CICD pipeline with a service principal to run terraform
 - Use Gitops methodology to manage AKS internals instead of doing it like I did through kubernetes provider
 - Improving AKS security even more (RBAC authentication, TLS, etc). I chose not to add those because I wanted for the code to remain as simple as possible while focusing on the AML side.
+- Instead of using default firewall rule with tag AzureMonitor, you can Secure Azure Monitor with [Azure Monitor Private Link](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-secure-workspace-vnet?tabs=required%2Cpe%2Ccli#secure-azure-monitor-and-application-insights) to prevent data exfiltration on Log Analytics.
+- You can add [a service endpoint policy](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-prevent-data-loss-exfiltration?tabs=servicetag) to prevent data exfiltration on Storage Account 
 
 ## Additionnal documentation
 

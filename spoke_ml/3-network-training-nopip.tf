@@ -14,37 +14,13 @@ resource "azurerm_network_security_group" "nsg-training" {
   resource_group_name = azurerm_resource_group.rg_ml.name
 
   security_rule {
-    name                       = "InboundBatchNodeManagement"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "29876-29877"
-    source_address_prefix      = "VirtualNetwork"
-    destination_address_prefix = "VirtualNetwork"
-  }
-
-  security_rule {
-    name                       = "InboundAzureMachineLearning"
-    priority                   = 110
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "44224"
-    source_address_prefix      = "AzureLoadBalancer"
-    destination_address_prefix = "VirtualNetwork"
-  }
-
-  security_rule {
     name                       = "AzureActiveDirectory"
     priority                   = 120
     direction                  = "Outbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_ranges    = ["80","443"]
+    destination_port_ranges    = ["443"]
     source_address_prefix      = "VirtualNetwork"
     destination_address_prefix = "AzureActiveDirectory"
   }
